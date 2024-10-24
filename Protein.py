@@ -22,26 +22,23 @@ class Protein:
 		self.complexity = None
 		self.fitness = None
 
-	def Copy(self, Parent):
+	def Replicate(self, Parent):
 		self.parent_idx = Parent.idx
 		self.nt_sequence = Parent.nt_sequence
 		self.aa_sequence = Parent.aa_sequence
+
+	def CopyPhenotype(self, Parent):
 		self.ss_structure = Parent.ss_structure
 		self.exposure = Parent.exposure
 		self.stability = Parent.stability
 		self.complexity = Parent.complexity
 		self.fitness = Parent.fitness
 
-	def Replicate(self, Parent):
-		self.parent_idx = Parent.idx
-		self.nt_sequence = Parent.nt_sequence
-		self.aa_sequence = Parent.aa_sequence
-
 	def Translate(self):
 		S = ""
 		for i in range(0, len(self.nt_sequence)-len(self.nt_sequence)%3,3):
 			S += CodonTable[self.nt_sequence[i:i+3]]
-		self.aa_sequence = S
+		self.aa_sequence = S.split('*')[0]
 
 	def Mutate(self):
 
@@ -77,10 +74,12 @@ class Protein:
 
 		if Config.genotype_level == 'nt':
 			self.nt_sequence = S
-			self.aa_sequence = self.Translate()
+			self.Translate()
 
 		elif Config.genotype_level == 'aa':
 			self.aa_sequence = S
+
+		return S == s	#Report back whether a mutation occurred.
 
 	def ReadSSP(self, ssp_file):
 		with open(ssp_file, 'r') as fin:
@@ -135,30 +134,41 @@ class Protein:
 		self.complexity = KC.calc_KC(self.BinaryStructure())
 
 	def MakePhenotype(self):
-		with torch.no_grad(), open(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb', 'w') as fout:
-			pdb = model.infer_pdb(self.aa_sequence)
-			fout.write(pdb+'\n')
+		print(self.idx, self.parent_idx, self.nt_sequence, self.aa_sequence)
+		if self.aa_sequence == "":
+			self.ss_structure = ""
+			self.exposure = ""
+			self.stability = None
+			self.complexity = None
 
-		os.system(f"/home/sam/miniconda3/envs/biolib/bin/mkdssp -i {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb -o {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.ssp")
+		else:
+			with torch.no_grad(), open(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb', 'w') as fout:
+				pdb = model.infer_pdb(self.aa_sequence)
+				fout.write(pdb+'\n')
 
-		#Extract secondary structure and exposure strings
-		Seq, Str, Exp = self.ReadSSP(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.ssp')
-		self.ss_structure = Str
-		self.exposure = Exp
+			os.system(f"/home/sam/miniconda3/envs/biolib/bin/mkdssp -i {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb -o {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.ssp")
 
-		#Extract stability
-		Stab = self.ReadPDB(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb')
-		self.stability = Stab
+			#Extract secondary structure and exposure strings
+			Seq, Str, Exp = self.ReadSSP(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.ssp')
+			self.ss_structure = Str
+			self.exposure = Exp
 
-		#Calculate structural complexity.
-		self.CalcComplexity()
+			#Extract stability
+			Stab = self.ReadPDB(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb')
+			self.stability = Stab
+
+			#Calculate structural complexity.
+			self.CalcComplexity()
 
 	def SimilarityToPhenotype(self, target):
-		# Currently using Hamming distance but could also implement alignment.
-		f = 0
-		for p, q in zip(self.ss_structure, target):
-			if p == q:	f += 1
-		return f
+		# # Currently using Hamming distance but could also implement alignment.
+		# f = 0
+		# for p, q in zip(self.ss_structure, target):
+		# 	if p == q:	f += 1
+		# return f
+	
+		print(self.ss_structure, target)
+		return aligner.score(self.ss_structure, target)
 
 	def AssignFitness(self):
 

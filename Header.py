@@ -7,6 +7,8 @@ import numpy as np
 import torch
 import math, sys, os
 import KC
+from Bio.Align import PairwiseAligner
+from Bio.Seq import Seq
 
 model, alphabet = torch.hub.load("facebookresearch/esm:main", "esm2_t33_650M_UR50D")
 
@@ -17,8 +19,10 @@ model = esm.pretrained.esmfold_v1()
 model = model.eval().cuda()
 # model.set_chunk_size(128)
 
+aligner = PairwiseAligner(mode='global', match_score=1, mismatch_score=0, gap_score=0)
+
 linuxhome_dir = '/linuxhome/tmp/sam/protevol'
-Nucleotides = ['A','C','G','U']
+Nucleotides = ['A','C','G','T']
 MutProbsNT = [[0, 1/6, 4/6, 1/6], [1/6, 0, 1/6, 4/6], [4/6, 1/6, 0, 1/6], [1/6, 4/6, 1/6, 0]]
 AminoAcids = ['A','G','I','L','P','V','F','W','Y','D','E','R','H','K','S','T','C','M','N','Q']
 MutProbsAA = np.ones((20,20))

@@ -40,7 +40,9 @@ class Population:
 
 			else:	#For the remaining individuals, we just copy from the first individual.
 				self.CurrentGeneration.append(Protein(i+1))
-				self.CurrentGeneration[i].Copy(self.CurrentGeneration[0])
+				self.CurrentGeneration[i].Replicate(self.CurrentGeneration[0])
+				self.CurrentGeneration[i].parent_idx = 0
+				self.CurrentGeneration[i].CopyPhenotype(self.CurrentGeneration[0])
 
 	def CalculateFitness(self):
 		m = min([self.CurrentGeneration[i].fitness for i in range(self.popsize)])	#Since fitness is relative, we subtract the lowest fitness from all others, in order to not overflow on the exponentiation of e.
@@ -66,7 +68,7 @@ class Population:
 			if len(self.ParentGeneration) == 0:	#First timestep, so there is no parent generation yet.
 				fits = [1 for c in candidates]
 			else:
-				fits = [self.CurrentGeneration[c].SimilarityToPhenotype(self.ParentGeneration[self.CurrentGeneration[c].parent_idx-1]) for c in candidates]
+				fits = [self.CurrentGeneration[c].SimilarityToPhenotype(self.ParentGeneration[self.CurrentGeneration[c].parent_idx-1].ss_structure) for c in candidates]
 
 		max_f = [c for c, f in zip(candidates, fits) if f==max(fits)]
 		return rn.choice(max_f)
@@ -84,10 +86,12 @@ class Population:
 
 			self.NextGeneration.append(Protein(i+1))
 			self.NextGeneration[i].Replicate(self.CurrentGeneration[c])
-			self.NextGeneration[i].Mutate()
-			self.NextGeneration[i].MakePhenotype()
-			if Config.comp_scale == 0:
-				self.NextGeneration[i].AssignFitness(Config.target_structure)
+			if self.NextGeneration[i].Mutate():	#No mutation happened, so just copy the phenotype
+				self.NextGeneration[i].CopyPhenotype(self.CurrentGeneration[c])
+			else:
+				self.NextGeneration[i].MakePhenotype()
+				if Config.comp_scale == 0:
+					self.NextGeneration[i].AssignFitness(Config.target_structure)
 
 		self.ParentGeneration = self.CurrentGeneration.copy()
 		self.CurrentGeneration = self.NextGeneration.copy()
