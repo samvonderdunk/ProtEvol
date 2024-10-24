@@ -134,7 +134,6 @@ class Protein:
 		self.complexity = KC.calc_KC(self.BinaryStructure())
 
 	def MakePhenotype(self):
-		print(self.idx, self.parent_idx, self.nt_sequence, self.aa_sequence)
 		if self.aa_sequence == "":
 			self.ss_structure = ""
 			self.exposure = ""
@@ -167,7 +166,6 @@ class Protein:
 		# 	if p == q:	f += 1
 		# return f
 	
-		print(self.ss_structure, target)
 		return aligner.score(self.ss_structure, target)
 
 	def AssignFitness(self):
