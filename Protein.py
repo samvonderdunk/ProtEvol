@@ -2,7 +2,8 @@
 
 # Import modules #
 
-from PE5_header import *
+from Header import *
+import Config
 
 #####################
 ### Protein class ###
@@ -21,6 +22,16 @@ class Protein:
 		self.complexity = None
 		self.fitness = None
 
+	def Copy(self, Parent):
+		self.parent_idx = Parent.idx
+		self.nt_sequence = Parent.nt_sequence
+		self.aa_sequence = Parent.aa_sequence
+		self.ss_structure = Parent.ss_structure
+		self.exposure = Parent.exposure
+		self.stability = Parent.stability
+		self.complexity = Parent.complexity
+		self.fitness = Parent.fitness
+
 	def Replicate(self, Parent):
 		self.parent_idx = Parent.idx
 		self.nt_sequence = Parent.nt_sequence
@@ -34,11 +45,11 @@ class Protein:
 
 	def Mutate(self):
 
-		if genotype_level == 'nt':
+		if Config.genotype_level == 'nt':
 			Alphabet = Nucleotides
 			MutProbs = MutProbsNT
 			s = self.nt_sequence
-		elif genotype_level == 'aa':
+		elif Config.genotype_level == 'aa':
 			Alphabet = AminoAcids
 			MutProbs = MutProbsAA
 			s = self.aa_sequence
@@ -46,14 +57,14 @@ class Protein:
 		S = ""
 		i = 0
 		while i < len(s):
-			if rn.random() < mutation_rate:
+			if rn.random() < Config.mutation_rate:
 				mut_type = rn.random()
-				if mut_type < p_insertion:	#Insertion.
+				if mut_type < Config.p_insertion:	#Insertion.
 					S += rn.choice(Alphabet)
 					while rn.random() < 0.5:	#Exponentially decaying insertion length.
 						S += rn.choice(Alphabet)
 					S += s[i]
-				elif mut_type < (1.0 - p_deletion):	#Substitution.
+				elif mut_type < (1.0 - Config.p_deletion):	#Substitution.
 					q = rn.choices(Alphabet, weights=MutProbs[Alphabet.index(s[i])], k=1)[0]
 					S += q
 				else:	#Deletion.
@@ -62,15 +73,16 @@ class Protein:
 						i += 1
 			else:
 				S += s[i]
+				i += 1
 
-		if genotype_level == 'nt':
+		if Config.genotype_level == 'nt':
 			self.nt_sequence = S
 			self.aa_sequence = self.Translate()
 
-		elif genotype_level == 'aa':
+		elif Config.genotype_level == 'aa':
 			self.aa_sequence = S
 
-	def ReadSSP(ssp_file):
+	def ReadSSP(self, ssp_file):
 		with open(ssp_file, 'r') as fin:
 			read = False
 			Sequence = ""
@@ -82,19 +94,19 @@ class Protein:
 					Structure += line[16]
 					Sequence += line[13]
 					rel_exp = int(line[35:38])/MaxExposureTable[Sequence[-1]]
-					Exposure += ('E' if rel_exp>exp_threshold else 'B')
+					Exposure += ('E' if rel_exp>Config.exp_threshold else 'B')
 				if line[:5] == "  #  ": read = True
 
-			if phenotype_level == "1D":
+			if Config.phenotype_level == "1D":
 				for ss in ['I','G']:
 					Structure = Structure.replace(ss, 'H')
 				for ss in [' ','T','S','B']:
 					Structure = Structure.replace(ss, 'C')
-			elif phenotype_level == "2D":
+			elif Config.phenotype_level == "2D":
 				Structure = Structure.replace(' ','A')
 		return Sequence, Structure, Exposure
 	
-	def ReadPDB(pdb_file):
+	def ReadPDB(self, pdb_file):
 		b_facts = []
 		with open(pdb_file, 'r') as fin:
 			for line in fin:
@@ -108,7 +120,7 @@ class Protein:
 			return stab
 		
 	def BinaryStructure(self):
-		s = self.structure
+		s = self.ss_structure
 		s = s.replace('A','000')
 		s = s.replace('E','111')
 		s = s.replace('B','010')
@@ -123,21 +135,19 @@ class Protein:
 		self.complexity = KC.calc_KC(self.BinaryStructure())
 
 	def MakePhenotype(self):
-		with torch.no_grad():
-			print(self.aa_sequence)
+		with torch.no_grad(), open(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb', 'w') as fout:
 			pdb = model.infer_pdb(self.aa_sequence)
-			with open(f'{linuxhome_dir}/{project_name}/tmp/{self.idx}_{self.parent_idx}.pdb', 'w') as fout:
-				fout.write(pdb+'\n')
+			fout.write(pdb+'\n')
 
-		os.system(f"/home/sam/miniconda3/envs/biolib/bin/mkdssp -i {self.idx}_{self.parent_idx}.pdb -o {self.idx}_{self.parent_idx}.ssp")
+		os.system(f"/home/sam/miniconda3/envs/biolib/bin/mkdssp -i {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb -o {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.ssp")
 
 		#Extract secondary structure and exposure strings
-		Seq, Str, Exp = self.ReadSSP(f'{self.idx}_{self.parent_idx}.ssp', exp_threshold, phenotype_level)
+		Seq, Str, Exp = self.ReadSSP(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.ssp')
 		self.ss_structure = Str
 		self.exposure = Exp
 
 		#Extract stability
-		Stab = self.ReadPDB(f'{self.idx}_{self.parent_idx}.pdb')
+		Stab = self.ReadPDB(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb')
 		self.stability = Stab
 
 		#Calculate structural complexity.
@@ -152,16 +162,16 @@ class Protein:
 
 	def AssignFitness(self):
 
-		if fitness_criterion == 'neutral':
+		if Config.fitness_criterion == 'neutral':
 			self.fitness = 100
 
-		elif fitness_criterion == 'target_structure':
-			self.fitness = self.SimilarityToPhenotype(target_structure)
+		elif Config.fitness_criterion == 'target_structure':
+			self.fitness = self.SimilarityToPhenotype(Config.target_structure)
 
-		elif fitness_criterion == 'complexity_structure':
+		elif Config.fitness_criterion == 'complexity_structure':
 			self.fitness = self.complexity
 
-		elif fitness_criterion == 'simplicity_structure':
+		elif Config.fitness_criterion == 'simplicity_structure':
 			self.fitness = - self.complexity
 
 	def PrintString(self):

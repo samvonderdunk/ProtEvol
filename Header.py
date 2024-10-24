@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Here I just import all modules and define some fixed variables.
+
 import random as rn
 import numpy as np
 import torch
@@ -15,35 +17,7 @@ model = esm.pretrained.esmfold_v1()
 model = model.eval().cuda()
 # model.set_chunk_size(128)
 
-# Simulation variables #
-
 linuxhome_dir = '/linuxhome/tmp/sam/protevol'
-project_name = 'test'
-initial_seed = 203
-population_size = 100
-simulation_time = 100
-output_file = ''
-input_sequence = ''
-
-# Variables (part 2) #
-
-target_structure = ""
-selection_coefficient = 0.1
-comp_scale = 0
-p_select_for_target = 0.1
-fitness_criterion = 'target_structure'
-
-# Variables (part 3) #
-
-mutation_rate = 0.001
-p_insertion = 0.
-p_deletion = 0.
-genotype_level = 'nt'
-phenotype_level = '2D'
-exp_threshold = 0.5
-
-# Fixed variables #
-
 Nucleotides = ['A','C','G','U']
 MutProbsNT = [[0, 1/6, 4/6, 1/6], [1/6, 0, 1/6, 4/6], [4/6, 1/6, 0, 1/6], [1/6, 4/6, 1/6, 0]]
 AminoAcids = ['A','G','I','L','P','V','F','W','Y','D','E','R','H','K','S','T','C','M','N','Q']
@@ -139,70 +113,3 @@ MaxExposureTable = {
 	'Y': 255,
 	'V': 165
 }
-
-
-## Change functions (allows you to change the parameter globally from PE5_main.py ##
-
-def change_project_name(new_value):
-    global project_name
-    project_name = new_value
-
-def change_initial_seed(new_value):
-    global initial_seed
-    initial_seed = new_value
-
-def change_population_size(new_value):
-    global population_size
-    population_size = new_value
-
-def change_output_file(new_value):
-    global output_file
-    output_file = new_value
-
-def change_input_sequence(new_value):
-    global input_sequence
-    input_sequence = new_value
-
-def change_target_structure(new_value):
-    global target_structure
-    target_structure = new_value
-
-def change_selection_coefficient(new_value):
-    global selection_coefficient
-    selection_coefficient = new_value
-
-def change_comp_scale(new_value):
-    global comp_scale
-    comp_scale = new_value
-
-def change_p_select_for_target(new_value):
-    global p_select_for_target
-    p_select_for_target = new_value
-
-def change_fitness_criterion(new_value):
-    global fitness_criterion
-    fitness_criterion = new_value
-
-def change_mutation_rate(new_value):
-    global mutation_rate
-    mutation_rate = new_value
-
-def change_p_insertion(new_value):
-    global p_insertion
-    p_insertion = new_value
-
-def change_p_deletion(new_value):
-    global p_deletion
-    p_deletion = new_value
-
-def change_genotype_level(new_value):
-    global genotype_level
-    genotype_level = new_value
-
-def change_phenotype_level(new_value):
-    global phenotype_level
-    phenotype_level = new_value
-
-def change_exp_threshold(new_value):
-    global exp_threshold
-    exp_threshold = new_value
