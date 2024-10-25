@@ -62,7 +62,7 @@ P = Population()
 P.Initialize()
 P.Output(0)
 
-for time in range(1, simulation_time):
+for time in range(1, simulation_time+1):
 	print(time)
 	P.Update()
 	P.Output(time)
