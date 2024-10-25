@@ -49,7 +49,7 @@ else:
 	rn.seed(Config.initial_seed)
 	os.system(f'mkdir -p {linuxhome_dir}/{Config.project_name}')
 	os.system(f'mkdir -p {linuxhome_dir}/{Config.project_name}/tmp')
-	os.system(f'touch {linuxhome_dir}/{Config.project_name}/{Config.project_name}')
+	os.system(f'touch {linuxhome_dir}/{Config.project_name}/{Config.project_name}.out')
 
 if Config.fitness_criterion == 'target_structure' and not Config.target_structure:
 	PrintHelp()
