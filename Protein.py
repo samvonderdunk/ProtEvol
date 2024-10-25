@@ -38,7 +38,12 @@ class Protein:
 		S = ""
 		for i in range(0, len(self.nt_sequence)-len(self.nt_sequence)%3,3):
 			S += CodonTable[self.nt_sequence[i:i+3]]
-		self.aa_sequence = S.split('*')[0]
+			if S[-1] == '*':
+				if rn.random() < Config.transl_stop_prob:
+					S = S[:-1]
+					break
+		self.aa_sequence = S.replace('*',' ')
+		# self.aa_sequence = S.split('*')[0]
 
 	def Mutate(self):
 

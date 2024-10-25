@@ -26,3 +26,4 @@ p_deletion = 0.
 genotype_level = 'nt'
 phenotype_level = '2D'
 exp_threshold = 0.5
+transl_stop_prob = 0.1
