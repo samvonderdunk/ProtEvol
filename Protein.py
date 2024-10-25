@@ -185,10 +185,10 @@ class Protein:
 			self.fitness = self.SimilarityToPhenotype(Config.target_structure)
 
 		elif Config.fitness_criterion == 'complexity_structure':
-			self.fitness = self.complexity
+			self.fitness = self.complexity / 3
 
 		elif Config.fitness_criterion == 'simplicity_structure':
-			self.fitness = - self.complexity
+			self.fitness = - self.complexity / 3
 
 	def PrintString(self):
 		return f"{self.idx}\t{self.parent_idx}\t{self.nt_sequence}\t{self.aa_sequence}\t{self.ss_structure}\t{self.exposure}\t{self.stability}\t{self.complexity}\t{self.fitness}"

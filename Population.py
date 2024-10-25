@@ -36,7 +36,7 @@ class Population:
 				self.CurrentGeneration[i].MakePhenotype()
 
 				if Config.comp_scale == 0:   #Global competition.
-					self.CurrentGeneration[i].AssignFitness(Config.target_structure)
+					self.CurrentGeneration[i].AssignFitness()
 
 			else:	#For the remaining individuals, we just copy from the first individual.
 				self.CurrentGeneration.append(Protein(i+1))
@@ -91,7 +91,7 @@ class Population:
 			else:
 				self.NextGeneration[i].MakePhenotype()
 				if Config.comp_scale == 0:
-					self.NextGeneration[i].AssignFitness(Config.target_structure)
+					self.NextGeneration[i].AssignFitness()
 
 		self.ParentGeneration = self.CurrentGeneration.copy()
 		self.CurrentGeneration = self.NextGeneration.copy()
