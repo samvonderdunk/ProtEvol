@@ -42,7 +42,7 @@ class Protein:
 				if rn.random() < Config.transl_stop_prob:
 					S = S[:-1]
 					break
-		self.aa_sequence = S.replace('*',' ')
+		self.aa_sequence = S.replace('*','')
 		# self.aa_sequence = S.split('*')[0]
 
 	def Mutate(self):
