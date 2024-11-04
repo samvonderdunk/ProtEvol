@@ -12,7 +12,7 @@ from Protein import Protein
 from Population import Population
 
 def PrintHelp():
-	print("-> Incorrent programme call\n::: Protein Evolution v.5 :::\nUsage: ./PE5_main.py -p [project name] -s [initial seed] -m [mutation rate] -w [selection coefficient] -N [population size] -t [simulation time] -F [fitness criterion] -C [competition scale] -T [target structure file] -i [input sequence] [-pst proportion selecting for target]\nSee PE5_header.py for default parameters and other important settings...\n")
+	print("-> Incorrent programme call\n::: Protein Evolution v.5 :::\nUsage: ./PE5_main.py -p [project name] -s [initial seed] -m [mutation rate] -w [selection coefficient] -N [population size] -t [simulation time] -F [fitness criterion] -C [competition scale] -T [target structure file] -i [input sequence] [-pst proportion selecting for target] [-g genotype level]\nSee PE5_header.py for default parameters and other important settings...\n")
 	sys.exit(1)
 
 i_arg = 1
@@ -39,6 +39,8 @@ while i_arg != len(sys.argv):
 		Config.input_sequence = sys.argv[i_arg+1]
 	elif sys.argv[i_arg] == '-pst':
 		Config.p_select_for_target = float(sys.argv[i_arg+1])
+	elif sys.argv[i_arg] == '-g':
+		Config.genotype_level = sys.argv[i_arg+1]
 	else:
 		PrintHelp()
 	i_arg += 2

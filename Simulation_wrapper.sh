@@ -39,16 +39,16 @@ ProjectBaseName=RPS
 PopSize=100
 SimTime=1000
 CompScale=0
-StartSeed=290
-MutRate=0.00167
+StartSeed=280
+MutRate=0.005
 
 SimDir=/net/vacuole1/linuxhome/ph-group/sam/NOBINFBACKUP-Documents/ProteinEvol/Yeast/MyAnalysis/alternative_folding/simulation/proteins
-InitSeq=`cat ${SimDir}/Q55C17.dna`
+InitSeq=`cat ${SimDir}/Q55C17.seq`
 
-for i in {11..20};
+for i in {1..10};
 do
 	Seed=$((StartSeed+i))
 	ProjectName=${ProjectBaseName}${i}
 
-	CUDA_VISIBLE_DEVICES=$GPU $ProtEvol -p $ProjectName -s $Seed -m $MutRate -N $PopSize -t $SimTime -C $CompScale -i $InitSeq -F simplicity_structure > /linuxhome/tmp/sam/protevol/${ProjectName}.log
+	CUDA_VISIBLE_DEVICES=$GPU $ProtEvol -p $ProjectName -s $Seed -m $MutRate -N $PopSize -t $SimTime -C $CompScale -i $InitSeq -F complexity_structure -g aa > /linuxhome/tmp/sam/protevol/${ProjectName}.log
 done
