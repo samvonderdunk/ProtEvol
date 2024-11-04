@@ -69,6 +69,7 @@ class Protein:
 				elif mut_type < (1.0 - Config.p_deletion):	#Substitution.
 					q = rn.choices(Alphabet, weights=MutProbs[Alphabet.index(s[i])], k=1)[0]
 					S += q
+					i += 1
 				else:	#Deletion.
 					i += 1
 					while rn.random() < 0.5:	#Exponentially decaying deletion length.
