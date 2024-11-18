@@ -89,17 +89,18 @@ sns.set_theme()
 sns.set_style("ticks", {"axes.grid": True, "grid.color": "lightgrey", "grid.linestyle": ":"})
 sns.set_context("notebook", font_scale=0.7)
 
-fig, axs = plt.subplots(4, 1, figsize=(10,12), tight_layout=True, sharex=True)
+fig, axs = plt.subplots(6, 1, figsize=(10,12), tight_layout=True, sharex=True)
 
-plot_vars = ['sequence_length','initial_seq_similarity','parent_struct_similarity','target_struct_similarity']
-plot_colors = ['black', 'brown', 'gold', 'midnightblue']
+plot_vars = ['sequence_length','initial_seq_similarity','parent_struct_similarity','target_struct_similarity', 'fitness', 'complexity']
+plot_colors = ['black', 'brown', 'gold', 'midnightblue', 'green', 'pink']
 
-axs[0].set_xlim([0,100])
+axs[0].set_xlim([0,1000])
 
 for i, var in enumerate(plot_vars):
+	if var not in MeanData.columns:	continue
 	axs[i].plot(Data['time'], Data[var], 's', color=plot_colors[i], ms=6, clip_on=False, label="", alpha=0.03, mew=0)
 	axs[i].plot(MeanData['time'], MeanData[var], '-', color=plot_colors[i])
-	axs[i].set_ylim([0,300])
+	if var not in ['fitness','complexity']:	axs[i].set_ylim([0,300])
 	axs[i].set_ylabel(var)
 	axs[i].grid(True)
 
