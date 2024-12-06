@@ -68,7 +68,7 @@ class Population:
 			if len(self.ParentGeneration) == 0:	#First timestep, so there is no parent generation yet.
 				fits = [1 for c in candidates]
 			else:
-				fits = [self.CurrentGeneration[c].SimilarityToPhenotype(self.ParentGeneration[self.CurrentGeneration[c].parent_idx-1].ss_structure) for c in candidates]
+				fits = [self.CurrentGeneration[c].SimilarityToPhenotype(self.ParentGeneration[self.CurrentGeneration[c].parent_idx-1].ss_structure) / len(self.CurrentGeneration[c].ss_structure) for c in candidates] #Parent similarity normalized by length of current individual to not incentivize sequence growth.
 
 		max_f = [c for c, f in zip(candidates, fits) if f==max(fits)]
 		return rn.choice(max_f)

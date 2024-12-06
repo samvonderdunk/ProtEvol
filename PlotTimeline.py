@@ -75,8 +75,8 @@ Data['target_struct_similarity'] = Data['ss_structure'].apply(lambda x: AlignStr
 
 #Assign similarity to parent
 Data['parent_struct_similarity'] = 0.
-Data.loc[Data['time']==0, 'parent_struct_similarity'] = Data[Data['time']==0]['ss_structure'].str.len()
-Data.loc[Data['time']!=0, 'parent_struct_similarity'] = Data[Data['time']!=0].apply(lambda x: AlignStrings(Data[(Data['idx']==x['parent_idx']) & (Data['time']==x['time']-1)]['ss_structure'].values[0], x['ss_structure']), axis=1)
+Data.loc[Data['time']==0, 'parent_struct_similarity'] = 1.0
+Data.loc[Data['time']!=0, 'parent_struct_similarity'] = Data[Data['time']!=0].apply(lambda x: AlignStrings(Data[(Data['idx']==x['parent_idx']) & (Data['time']==x['time']-1)]['ss_structure'].values[0], x['ss_structure']) / len(x['ss_structure']), axis=1)
 
 #Assign sequence similarity to input sequence
 Data['initial_seq_similarity'] = Data['aa_sequence'].apply(lambda x: AlignStrings(x, input_sequence))
@@ -100,7 +100,7 @@ for i, var in enumerate(plot_vars):
 	if var not in MeanData.columns:	continue
 	axs[i].plot(Data['time'], Data[var], 's', color=plot_colors[i], ms=6, clip_on=False, label="", alpha=0.03, mew=0)
 	axs[i].plot(MeanData['time'], MeanData[var], '-', color=plot_colors[i])
-	if var not in ['fitness','complexity']:	axs[i].set_ylim([0,300])
+	if var not in ['parent_struct_similarity','fitness','complexity']:	axs[i].set_ylim([0,300])
 	axs[i].set_ylabel(var)
 	axs[i].grid(True)
 
