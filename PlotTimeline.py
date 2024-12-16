@@ -100,7 +100,8 @@ for i, var in enumerate(plot_vars):
 	if var not in MeanData.columns:	continue
 	axs[i].plot(Data['time'], Data[var], 's', color=plot_colors[i], ms=6, clip_on=False, label="", alpha=0.03, mew=0)
 	axs[i].plot(MeanData['time'], MeanData[var], '-', color=plot_colors[i])
-	if var not in ['parent_struct_similarity','fitness','complexity']:	axs[i].set_ylim([0,300])
+	if var == 'parent_struct_similarity':		axs[i].set_ylim([0.0,1.0])
+	elif var not in ['fitness','complexity']:	axs[i].set_ylim([0,300])
 	axs[i].set_ylabel(var)
 	axs[i].grid(True)
 
