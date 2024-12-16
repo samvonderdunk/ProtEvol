@@ -63,7 +63,7 @@ class Population:
 		candidates = rn.sample(range(self.popsize), k=Config.comp_scale)
 
 		if rn.random() < Config.p_select_for_target:
-			fits = [self.CurrentGeneration[c].SimilarityToPhenotype(Config.target_structure) for c in candidates]
+			fits = [self.CurrentGeneration[c].SimilarityToPhenotype(Config.target_structure) - len(self.CurrentGeneration[c].aa_sequence)/3 for c in candidates]
 		else:
 			if len(self.ParentGeneration) == 0:	#First timestep, so there is no parent generation yet.
 				fits = [1 for c in candidates]
