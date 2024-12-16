@@ -21,9 +21,9 @@ fitness_criterion = 'target_structure'
 # Variables (part 3) #
 
 mutation_rate = 0.001
-p_insertion = 0.
-p_deletion = 0.
-genotype_level = 'nt'
+p_insertion = 0.05
+p_deletion = 0.05
+genotype_level = 'aa'
 phenotype_level = '2D'
 exp_threshold = 0.5
-transl_stop_prob = 0.1
+transl_stop_prob = 1.0
