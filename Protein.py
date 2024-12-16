@@ -56,6 +56,7 @@ class Protein:
 			MutProbs = MutProbsAA
 			s = self.aa_sequence
 
+		# Small, position-level mutations.
 		S = ""
 		i = 0
 		while i < len(s):
@@ -77,6 +78,22 @@ class Protein:
 			else:
 				S += s[i]
 				i += 1
+
+		# Large mutations, drawn once per generation.
+		large_mu_draw = rn.random()
+		pos = rn.randint(0,len(S)-1)
+		mut_len = rn.randint(1,min(30,len(S)-pos))	#Uniform length between 1 and 30 (except if the starting position is very close to the C-terminus).
+		if large_mu_draw < Config.p_duplication:
+			S = S[:pos] + S[pos:][:mut_len] + S[pos:]
+		elif large_mu_draw < Config.p_duplication + Config.p_ablation:
+			S = S[:pos] + S[pos+mut_len:]
+		elif large_mu_draw < Config.p_duplication + Config.p_ablation + Config.p_reversion:
+			S = S[:pos] + S[pos:pos+mut_len][::-1] + S[pos+mut_len:]
+		elif large_mu_draw < Config.p_duplication + Config.p_ablation + Config.p_reversion + Config.p_transposition:
+			transposon = S[pos:pos+mut_len]	#First do an ablation but storing the ablated part.
+			S = S[:pos] + S[pos+mut_len:]	
+			ins_pos = rn.randint(0, len(S)-1)	#Then insert the ablated part somewhere back in the sequence.
+			S = S[:ins_pos] + transposon + S[ins_pos:]
 
 		if Config.genotype_level == 'nt':
 			self.nt_sequence = S
