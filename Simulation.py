@@ -22,7 +22,7 @@ while i_arg != len(sys.argv):
 	elif sys.argv[i_arg] == '-s':
 		Config.initial_seed = int(sys.argv[i_arg+1])
 	elif sys.argv[i_arg] == '-t':
-		simulation_time = int(sys.argv[i_arg+1])
+		Config.simulation_time = int(sys.argv[i_arg+1])
 	elif sys.argv[i_arg] == '-m':
 		Config.mutation_rate = float(sys.argv[i_arg+1])
 	elif sys.argv[i_arg] == '-w':
@@ -76,7 +76,7 @@ P = Population()
 P.Initialize()
 P.Output(0)
 
-for time in range(1, simulation_time+1):
+for time in range(1, Config.simulation_time+1):
 	print(time)
 	P.Update()
 	P.Output(time)
