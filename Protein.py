@@ -168,7 +168,7 @@ class Protein:
 				pdb = model.infer_pdb(self.aa_sequence)
 				fout.write(pdb+'\n')
 
-			os.system(f"/home/sam/miniconda3/envs/biolib/bin/mkdssp -i {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb -o {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.ssp")
+			os.system(f"{dssp_path} -i {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.pdb -o {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.ssp")
 
 			#Extract secondary structure and exposure strings
 			Seq, Str, Exp = self.ReadSSP(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.ssp')
