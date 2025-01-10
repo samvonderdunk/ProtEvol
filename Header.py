@@ -21,7 +21,8 @@ model = model.eval().cuda()
 
 aligner = PairwiseAligner(mode='global', match_score=1, mismatch_score=0, gap_score=0)
 
-linuxhome_dir = '/linuxhome/tmp/sam/protevol'
+linuxhome_dir = '/mnt/users/dunks/Projects/ProteinEvolution/Simulations'
+dssp_path = '/mnt/users/dunks/miniconda3/envs/biolib/bin/mkdssp'
 Nucleotides = ['A','C','G','T']
 MutProbsNT = [[0, 1/6, 4/6, 1/6], [1/6, 0, 1/6, 4/6], [4/6, 1/6, 0, 1/6], [1/6, 4/6, 1/6, 0]]
 AminoAcids = ['A','G','I','L','P','V','F','W','Y','D','E','R','H','K','S','T','C','M','N','Q']
