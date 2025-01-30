@@ -10,12 +10,12 @@ import KC
 from Bio.Align import PairwiseAligner
 from Bio.Seq import Seq
 
-model, alphabet = torch.hub.load("facebookresearch/esm:main", "esm2_t33_650M_UR50D")
+# model, alphabet = torch.hub.load("facebookresearch/esm:main", "esm2_t33_650M_UR50D")
 
 import esm
 os.environ['MKL_THREADING_LAYER'] = 'GNU'	#Solves an issue with numpy.
 
-model = esm.pretrained.esmfold_v1()
+model, alphabet = esm.pretrained.esmfold_v1()
 model = model.eval().cuda()
 # model.set_chunk_size(128)
 

@@ -194,6 +194,10 @@ class Protein:
 		else:
 			return aligner.score(self.ss_structure, target)
 
+	def BindingAffinity(self, target):
+
+		return 5
+
 	def AssignFitness(self):
 
 		if Config.fitness_criterion == 'neutral':
@@ -207,6 +211,9 @@ class Protein:
 
 		elif Config.fitness_criterion == 'simplicity_structure':
 			self.fitness = - self.complexity / 3
+
+		elif Config.fitness_criterion == 'binding_target':
+			self.fitness = self.BindingAffinity(Config.binding_target)
 
 	def PrintString(self):
 		return f"{self.idx}\t{self.parent_idx}\t{self.nt_sequence}\t{self.aa_sequence}\t{self.ss_structure}\t{self.exposure}\t{self.stability}\t{self.complexity}\t{self.fitness}"

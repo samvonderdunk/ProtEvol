@@ -44,7 +44,8 @@ MutRate=0.005
 SimDir=/mnt/users/dunks/Projects/ProteinEvolution/Simulations/proteins
 InitSeqs=(Seq0123.seq Seq0456.seq)
 
-for i in {31..40};
+# for i in {41..42};
+for i in 41;
 do
 	Seed=$((StartSeed+i))
 	ProjectName=${ProjectBaseName}${i}
@@ -55,5 +56,5 @@ do
 		InitSeq=${InitSeqs[1]}
 	fi
 
-	addqueue -q gpulong -s --gpus 1 --gputype rtx3090with24gb -m 25 /usr/local/shared/python/3.9.6/bin/python3 $ProtEvol -p $ProjectName -s $Seed -m $MutRate -N $PopSize -t $SimTime -C $CompScale -i `cat proteins/$InitSeq` -F simplicity_structure -g aa -mu_insertion 0 -mu_deletion 0 -mu_duplication 0 -mu_ablation 0 -mu_reversion 0 -mu_transposition 0 > /mnt/users/dunks/Projects/ProteinEvolution/Simulations/${ProjectName}.log
+	addqueue -q heraclesgpu -s --gpus 1 --gputype rtx6000adawith48gb -m 25 /usr/local/shared/python/3.9.6/bin/python3 $ProtEvol -p $ProjectName -s $Seed -m $MutRate -N $PopSize -t $SimTime -C $CompScale -i `cat proteins/$InitSeq` -F simplicity_structure -g aa -mu_insertion 0 -mu_deletion 0 -mu_duplication 0 -mu_ablation 0 -mu_reversion 0 -mu_transposition 0 > /mnt/users/dunks/Projects/ProteinEvolution/Simulations/${ProjectName}.log
 done
