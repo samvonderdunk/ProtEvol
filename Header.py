@@ -9,6 +9,10 @@ import math, sys, os
 import KC
 from Bio.Align import PairwiseAligner
 from Bio.Seq import Seq
+import pytorch_lightning as pl
+import miniclip
+from huggingface_hub import hf_hub_download
+
 
 model, alphabet = torch.hub.load("facebookresearch/esm:main", "esm2_t33_650M_UR50D")
 
@@ -18,6 +22,20 @@ os.environ['MKL_THREADING_LAYER'] = 'GNU'	#Solves an issue with numpy.
 model = esm.pretrained.esmfold_v1()
 model = model.eval().cuda()
 # model.set_chunk_size(128)
+
+clip_esm_model, clip_esm_alphabet = esm.pretrained.esm2_t33_650M_UR50D()
+clip_esm_batch_converter = clip_esm_alphabet.get_batch_converter()
+clip_esm_model.eval()  # disables dropout for deterministic results
+clip_esm_model.cuda() #push model to gpu
+
+miniclip_ckpt_path = hf_hub_download(
+    repo_id="ubiquitx/pepprclip",
+    filename="canonical_miniclip_4-22-23.ckpt"
+)
+
+miniclip_model = miniclip.MiniCLIP.load_from_checkpoint(miniclip_ckpt_path)
+miniclip_model.eval()
+miniclip_model.cuda()
 
 aligner = PairwiseAligner(mode='global', match_score=1, mismatch_score=0, gap_score=0)
 

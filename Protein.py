@@ -182,6 +182,30 @@ class Protein:
 			#Calculate structural complexity.
 			self.CalcComplexity()
 
+	##later, move this into a population level function
+	def BindingAffinity(self, target): ##note that this target is the peptide sequence
+		##feed sequence it into ESM
+		batch_labels, batch_strs, batch_tokens = clip_esm_batch_converter([("peptide_target_seq", target), ("protein_seq", self.aa_sequence)])
+		batch_tokens = batch_tokens.cuda()
+		batch_lens = (batch_tokens != clip_esm_alphabet.padding_idx).sum(1)
+
+		with torch.no_grad():
+			results = clip_esm_model(batch_tokens, repr_layers=[33], return_contacts=False)
+
+		token_representations = results["representations"][33].cpu()
+		del batch_tokens
+
+		sequence_representations = []
+		for j, tokens_len in enumerate(batch_lens):
+			sequence_representations.append(token_representations[j, 1 : tokens_len - 1].mean(0))
+
+		peptide_embedding = sequence_representations[0].cuda().unsqueeze(0)
+		protein_embedding = sequence_representations[1].cuda().unsqueeze(0)
+
+		affinity = miniclip_model(peptide_embedding, protein_embedding)
+
+		return affinity.cpu()
+
 	def SimilarityToPhenotype(self, target):
 		# # Currently using Hamming distance but could also implement alignment.
 		# f = 0
