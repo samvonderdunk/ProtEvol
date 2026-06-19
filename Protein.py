@@ -183,16 +183,16 @@ class Protein:
 			self.CalcComplexity()
 
 	def SimilarityToPhenotype(self, target):
-		# # Currently using Hamming distance but could also implement alignment.
-		# f = 0
-		# for p, q in zip(self.ss_structure, target):
-		# 	if p == q:	f += 1
-		# return f
+		# Currently using Hamming distance but could also implement alignment.
+		f = 0
+		for p, q in zip(self.ss_structure, target):
+			if p == q:	f += 1
+		return f
 	
-		if len(self.ss_structure) == 0:
-			return 0
-		else:
-			return aligner.score(self.ss_structure, target)
+		# if len(self.ss_structure) == 0:
+		# 	return 0
+		# else:
+		# 	return aligner.score(self.ss_structure, target)
 
 	def AssignFitness(self):
 

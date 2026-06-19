@@ -13,7 +13,7 @@ input_sequence = ''
 # Variables (part 2) #
 
 target_structure = ""
-selection_coefficient = 0.1
+selection_coefficient = 1
 comp_scale = 0
 p_select_for_target = 0.1
 fitness_criterion = 'target_structure'
@@ -28,6 +28,6 @@ p_ablation = 0.05       #Per protein
 p_reversion = 0.05      #Per protein
 p_transposition = 0.05  #Per protein
 genotype_level = 'aa'
-phenotype_level = '2D'
+phenotype_level = '1D'
 exp_threshold = 0.5
 transl_stop_prob = 1.0

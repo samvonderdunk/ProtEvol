@@ -5,11 +5,13 @@
 # Import modules #
 
 import math, sys, os
+import numpy as np
 from Bio.Align import PairwiseAligner
 from Bio.Seq import Seq
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from matplotlib import collections  as mc
 
 aligner = PairwiseAligner(mode='global', match_score=1, mismatch_score=0, gap_score=0)
 
@@ -38,7 +40,6 @@ def AlignStrings(string1, string2):
 data_file = ""
 input_sequence = ""
 target_structure = ""
-# structure_level = "2D" #pick 1D or 2D
 figure_name = ""
 
 i_arg = 1
@@ -49,8 +50,6 @@ while i_arg != len(sys.argv):
 		input_sequence = sys.argv[i_arg+1]
 	elif sys.argv[i_arg] == '-T':
 		target_structure = sys.argv[i_arg+1]
-	# elif sys.argv[i_arg] == '-lev':
-	# 	structure_level = sys.argv[i_arg+1]
 	elif sys.argv[i_arg] == '-o':
 		figure_name = sys.argv[i_arg+1]
 	else:
@@ -60,16 +59,9 @@ while i_arg != len(sys.argv):
 if data_file == "" or input_sequence == "" or target_structure == "" or figure_name == "":
 	PrintHelp()
 
-# if structure_level == '1D':
-# 	pick_stru = 's3_structure'
-# elif structure_level == '2D':
-# 	pick_stru = 'ss_structure'
-
 # Load data #
 
 Data = pd.read_csv(data_file, sep='\t', names=['time','idx','parent_idx','nt_sequence','aa_sequence','ss_structure','exposure','stability','complexity','fitness'])
-
-# Data['s3_structure'] = Data['ss_structure'].apply(lambda x: x.replace('I','H').replace('G','H').replace('A','C').replace('T','C').replace('S','C').replace('B','C'))
 
 # Manipulate data #
 
@@ -90,27 +82,47 @@ Data.loc[Data['time']!=0, 'parent_struct_similarity'] = Data[Data['time']!=0].ap
 #Assign sequence similarity to input sequence
 Data['initial_seq_similarity'] = Data['aa_sequence'].apply(lambda x: AlignStrings(x, input_sequence))
 
-MeanData = Data.groupby(by='time').agg('mean', numeric_only=True).reset_index()
+
+
+# Store all parent-offspring pairs #
+LineSegments = {'sequence_length':[],'initial_seq_similarity':[],'parent_struct_similarity':[],'target_struct_similarity':[], 'fitness':[], 'complexity':[]}
+end_time = Data['time'].values.max()
+gen_now = Data[Data['time']==end_time].index
+for time in np.arange(end_time, 0, -1):
+
+	gen_prev = []
+	GenPrev = Data[Data['time']==time-1]
+
+	for prot_idx in gen_now:
+		parent_idx = GenPrev[GenPrev['idx']==Data.iloc[prot_idx]['parent_idx']].index[0]
+		for yvar in LineSegments.keys():
+			LineSegments[yvar].append([(time-1,Data.iloc[parent_idx][yvar]),(time,Data.iloc[prot_idx][yvar])])
+		gen_prev.append(parent_idx)
+
+	gen_now = gen_prev
+
+
 
 # Plot #
-
 sns.set_theme()
 sns.set_style("ticks", {"axes.grid": True, "grid.color": "lightgrey", "grid.linestyle": ":"})
 sns.set_context("notebook", font_scale=0.7)
 
 fig, axs = plt.subplots(6, 1, figsize=(10,12), tight_layout=True, sharex=True)
 
-plot_vars = ['sequence_length','initial_seq_similarity','parent_struct_similarity','target_struct_similarity', 'fitness', 'complexity']
 plot_colors = ['black', 'brown', 'gold', 'midnightblue', 'green', 'pink']
 
 axs[0].set_xlim([0,Data['time'].values[-1]])
 
-for i, var in enumerate(plot_vars):
-	if var not in MeanData.columns:	continue
-	axs[i].plot(Data['time'], Data[var], 's', color=plot_colors[i], ms=6, clip_on=False, label="", alpha=0.03, mew=0)
-	axs[i].plot(MeanData['time'], MeanData[var], '-', color=plot_colors[i])
+for i, var in enumerate(LineSegments.keys()):
+
+	if LineSegments[var][0][0][1] == 'None':
+		continue
+	lc = mc.LineCollection(LineSegments[var], colors=plot_colors[i], linewidths=1)
+	axs[i].add_collection(lc)
 	if var == 'parent_struct_similarity':		axs[i].set_ylim([0.0,1.0])
-	elif var not in ['fitness','complexity']:	axs[i].set_ylim([0,300])
+	elif var == 'complexity':					axs[i].set_ylim([0,800])
+	elif var != 'fitness':						axs[i].set_ylim([0,300])
 	axs[i].set_ylabel(var)
 	axs[i].grid(True)
 

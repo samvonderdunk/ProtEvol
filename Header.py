@@ -25,7 +25,8 @@ linuxhome_dir = '/linuxhome/tmp/sam/protevol'
 Nucleotides = ['A','C','G','T']
 MutProbsNT = [[0, 1/6, 4/6, 1/6], [1/6, 0, 1/6, 4/6], [4/6, 1/6, 0, 1/6], [1/6, 4/6, 1/6, 0]]
 AminoAcids = ['A','G','I','L','P','V','F','W','Y','D','E','R','H','K','S','T','C','M','N','Q']
-MutProbsAA = np.ones((20,20))
+# MutProbsAA = np.ones((20,20)
+MutProbsAA = np.zeros((20,20))  # Filled in below using the CodonTable and MutProbsNT to obtain mutational probabilities based on nucleotide mutations (agnostic for the precise coding).
 
 CodonTable = {
     'TCA': 'S',    # Serina
@@ -94,6 +95,30 @@ CodonTable = {
     'GGT': 'G'     # Glicina
 }
 
+RevCodonTable = {
+	'S': ['TCA','TCC','TCG','TCT','AGC','AGT'],
+	'F': ['TTC','TTT'],
+	'L': ['TTA','TTG','CTA','CTC','CTG','CTT'],
+	'Y': ['TAC','TAT'],
+	'*': ['TAA','TAG','TGA'],
+	'C': ['TGC','TGT'],
+	'W': ['TGG'],
+	'P': ['CCA','CCC','CCG','CCT'],
+	'H': ['CAC','CAT'],
+	'Q': ['CAA','CAG'],
+	'R': ['CGA','CGC','CGG','CGT','AGA','AGG'],
+	'I': ['ATA','ATC','ATT'],
+	'M': ['ATG'],
+	'T': ['ACA','ACC','ACG','ACT'],
+	'N': ['AAC','AAT'],
+	'K': ['AAA','AAG'],
+	'V': ['GTA','GTC','GTG','GTT'],
+	'A': ['GCA','GCC','GCG','GCT'],
+	'D': ['GAC','GAT'],
+	'E': ['GAA','GAG'],
+	'G': ['GGA','GGC','GGG','GGT']
+}
+
 #Table from wikipedia but source is Tien et al. 2013 (empirical data).
 MaxExposureTable = {
 	'A': 121,
@@ -117,3 +142,28 @@ MaxExposureTable = {
 	'Y': 255,
 	'V': 165
 }
+
+for i in range(len(AminoAcids)):
+
+    for codon in RevCodonTable[AminoAcids[i]]:
+        for pos in range(len(codon)):
+            for nt in Nucleotides:
+                if nt == codon[pos]:
+                    w = 0
+                elif nt in ['A','G'] and codon[pos] in ['A','G']:
+                    w = 4/6
+                elif nt in ['C','T'] and codon[pos] in ['C','T']:
+                    w = 4/6
+                else:
+                    w = 1/6
+
+                if CodonTable[codon[:pos]+nt+codon[pos+1:]] == '*':
+                    continue
+
+                MutProbsAA[i][AminoAcids.index(CodonTable[codon[:pos]+nt+codon[pos+1:]])] += w
+
+    # Let's normalize rows to 1 here (not sure if strictly necessary for the random.choice function, but anyway).
+    MutProbsAA[i][i] = 0    #Staying the same is not allowed once we decide that a mutation takes place.
+    S = sum(MutProbsAA[i])
+    for j in range(len(AminoAcids)):
+        MutProbsAA[j] /= S
