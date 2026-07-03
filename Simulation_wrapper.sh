@@ -74,26 +74,51 @@ done
 
 #RPS
 ProtEvol=/mnt/users/dunks/Projects/ProteinEvolution/ProtEvol/Simulation.py
-ProjectBaseName=RPS
+ProjectBaseName=DNVVI
 PopSize=100
-SimTime=1000
+SimTime=10000
 CompScale=0
-StartSeed=330
-MutRate=0.005
+StartSeed=400
 
 SimDir=/mnt/users/dunks/Projects/ProteinEvolution/Simulations/proteins
-InitSeqs=(Seq0123.seq Seq0456.seq)
+# TargetStruct=`cat ${SimDir}/Seq0321.sss`
+# InitSeq=`cat ${SimDir}/Seq0123.seq`
+# Proteins=(NP_878148.1 NP_878156.3 NP_878048.1 NP_878178.1 NP_878161.1 NP_878088.1 NP_878182.1 NP_878053.1 NP_878160.1 NP_878059.1) #de novos
+Proteins=(NP_878183.1 NP_878183.1 NP_878105.1 NP_878128.1 NP_009412.1 NP_878131.1 NP_878157.3 NP_013092.1 NP_001018029.1 NP_219498.1) #established genes
 
-for i in {31..40};
+for i in {1..3};
 do
 	Seed=$((StartSeed+i))
 	ProjectName=${ProjectBaseName}${i}
 
-	if [ "$i" -lt "36" ]; then
-		InitSeq=${InitSeqs[0]}
-	else
-		InitSeq=${InitSeqs[1]}
-	fi
+	TargetStruct=`cat ${SimDir}/${Proteins[i-1]}.sss`
+	InitSeq=`cat ${SimDir}/${Proteins[i-1]}.seq`
 
-	addqueue -q gpulong -s --gpus 1 --gputype rtx3090with24gb -m 25 /usr/local/shared/python/3.9.6/bin/python3 $ProtEvol -p $ProjectName -s $Seed -m $MutRate -N $PopSize -t $SimTime -C $CompScale -i `cat proteins/$InitSeq` -F simplicity_structure -g aa -mu_insertion 0 -mu_deletion 0 -mu_duplication 0 -mu_ablation 0 -mu_reversion 0 -mu_transposition 0 > /mnt/users/dunks/Projects/ProteinEvolution/Simulations/${ProjectName}.log
+	addqueue -q gpulong -s --gpus 1 --gputype rtx3090with24gb -m 25 /usr/local/shared/python/3.9.6/bin/python3 $ProtEvol -p $ProjectName -s $Seed -m 0.02 -N $PopSize -t $SimTime -F target_robustness -C $CompScale -T $TargetStruct -i $InitSeq -pst 0.5 -w 1.0 > /mnt/users/dunks/Projects/ProteinEvolution/Simulations/${ProjectName}.log
 done
+
+# #RPS
+# ProtEvol=/mnt/users/dunks/Projects/ProteinEvolution/ProtEvol/Simulation.py
+# ProjectBaseName=RPS
+# PopSize=100
+# SimTime=1000
+# CompScale=0
+# StartSeed=330
+# MutRate=0.005
+
+# SimDir=/mnt/users/dunks/Projects/ProteinEvolution/Simulations/proteins
+# InitSeqs=(Seq0123.seq Seq0456.seq)
+
+# for i in {35..40};
+# do
+# 	Seed=$((StartSeed+i))
+# 	ProjectName=${ProjectBaseName}${i}
+
+# 	if [ "$i" -lt "36" ]; then
+# 		InitSeq=${InitSeqs[0]}
+# 	else
+# 		InitSeq=${InitSeqs[1]}
+# 	fi
+
+# 	addqueue -q gpulong -s --gpus 1 --gputype rtx3090with24gb -m 25 /usr/local/shared/python/3.9.6/bin/python3 $ProtEvol -p $ProjectName -s $Seed -m $MutRate -N $PopSize -t $SimTime -C $CompScale -i `cat proteins/$InitSeq` -F simplicity_structure -g aa -mu_insertion 0 -mu_deletion 0 -mu_duplication 0 -mu_ablation 0 -mu_reversion 0 -mu_transposition 0 > /mnt/users/dunks/Projects/ProteinEvolution/Simulations/${ProjectName}.log
+# done

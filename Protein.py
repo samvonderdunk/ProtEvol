@@ -208,5 +208,28 @@ class Protein:
 		elif Config.fitness_criterion == 'simplicity_structure':
 			self.fitness = - self.complexity / 3
 
+		elif Config.fitness_criterion == 'target_robustness':
+			#Sample X=10 point mutants and calculate the mutational robustness relative to the target structure.
+			mut_sims = []
+			for i in range(10):
+				pos = rn.randint(0,len(self.aa_sequence)-1)
+				q = self.aa_sequence[pos]
+				while q != self.aa_sequence[pos]:
+					q = rn.choices(AminoAcids, k=1)[0]
+				mut = self.aa_sequence[:pos] + q + self.aa_sequence[pos+1:]
+
+				with torch.no_grad(), open(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}_mut{i}.pdb', 'w') as fout:
+					pdb = model.infer_pdb(mut)
+					fout.write(pdb+'\n')
+
+				os.system(f"{dssp_path} -i {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}_mut{i}.pdb -o {linuxhome_dir}/{Config.project_name}/tmp/{self.idx}_mut{i}.ssp")
+
+				Seq, Str, Exp = self.ReadSSP(f'{linuxhome_dir}/{Config.project_name}/tmp/{self.idx}.ssp')
+				if len(Str) == 0:
+					mut_sims.append(0)
+				else:
+					mut_sims.append(aligner.score(Str,Config.target_structure))
+			self.fitness = np.mean(mut_sims, axis=0)
+
 	def PrintString(self):
 		return f"{self.idx}\t{self.parent_idx}\t{self.nt_sequence}\t{self.aa_sequence}\t{self.ss_structure}\t{self.exposure}\t{self.stability}\t{self.complexity}\t{self.fitness}"

@@ -70,8 +70,12 @@ class Population:
 			else:
 				fits = [self.CurrentGeneration[c].SimilarityToPhenotype(self.ParentGeneration[self.CurrentGeneration[c].parent_idx-1].ss_structure) / len(self.CurrentGeneration[c].ss_structure) for c in candidates] #Parent similarity normalized by length of current individual to not incentivize sequence growth.
 
-		max_f = [c for c, f in zip(candidates, fits) if f==max(fits)]
-		return rn.choice(max_f)
+		if Config.selection_coefficient == 0.0:	#Hard selection.
+			max_f = [c for c, f in zip(candidates, fits) if f==max(fits)]
+			return rn.choice(max_f)
+		
+		else:
+			return rn.choices(candidates, weights=[math.e ** (Config.selection_coefficient * f) for f in fits], k=1)[0]
 
 	def Update(self):
 
